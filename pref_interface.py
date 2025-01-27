@@ -135,6 +135,7 @@ class PrefInterface:
 
         while True:
             print("Segments {} and {}: ".format(s1.hash, s2.hash))
+            print("L: prefer left, R: prefer right, E: equal, blank: incomparable + ENTER")
             choice = input()
             # L = "I prefer the left segment"
             # R = "I prefer the right segment"
