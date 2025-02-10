@@ -12,8 +12,7 @@ The main purpose is to train an agent to perform robotic tasks or play to Atari 
 - [Getting Started](#getting-started)
 - [Project Structure](#project-structure)
 - [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
+
 
 ## Introduction
 
