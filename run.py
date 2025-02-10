@@ -6,7 +6,7 @@ from os import path as osp
 import sys
 import time
 from multiprocessing import Process, Queue
-
+import warnings
 import cloudpickle
 import easy_tf_log
 from a2c import logger
@@ -22,8 +22,13 @@ from reward_predictor_core_network import net_cnn, net_moving_dot_features
 from utils import VideoRenderer, get_port_range, make_env
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'  # filter out INFO messages
+# Remove the deprecation warnings
+import tensorflow as tf
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="pkg_resources")
 
+# ...existing code...
 def main():
     general_params, a2c_params, \
         pref_interface_params, rew_pred_training_params = parse_args()

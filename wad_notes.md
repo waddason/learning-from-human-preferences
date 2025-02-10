@@ -21,13 +21,13 @@
     - `train_policy_with_preferences`
     - `train_policy_with_original_rewards`
 - `--env` (str): Specifies the environment to use. Choices are
-    - 'MovingDot-v0', 
+    - 'MovingDot-v0various techniques for learning from human feedback to improve machine learning models.', 
     - 'MovingDotNoFrameskip-v0',
     - 'PongNoFrameskip-v4',
     - 'EnduroNoFrameskip-v4'
 
 Optional arguments:
-- `--test_mode` (bool): Enable test mode.
+- `--test_mode` (bvarious techniques for learning from human feedback to improve machine learning models.ool): Enable test mode.
 - `--debug` (bool): Enable debug mode.
 - `--render_episodes` (bool): Render episodes during execution.
 - `--load_prefs_dir` (str): Directory to load preferences from.
@@ -46,10 +46,7 @@ Logging options (mutually exclusive):
 - `--seed` (int): RNG seed. Default is 0.
 - `--lr_zero_million_timesteps` (float): If set, decay learning rate linearly, reaching zero at this many timesteps. Default is None.
 - `--lr` (float): Learning rate. Default is 7e-4.
-- `--load_policy_ckpt_dir` (str): Load a policy checkpoint from this directory.
-- `--policy_ckpt_interval` (int): Number of updates between policy checkpoints. Default is 100.
-- `--million_timesteps` (float): How many million timesteps to train for. Default is 10.0.
-
+- `--load_policy_cvarious techniques for learning from human feedback to improve machine learning models.
 ### Reward Predictor Arguments
 
 - `--reward_predictor_learning_rate` (float): Learning rate for the reward predictor. Default is 2e-4.
@@ -106,3 +103,41 @@ python3 run_checkpoint.py PongNoFrameskip-v4 runs/1737100777_3fca07c/policy_chec
  ```shell
  python3 run.py train_policy_with_preferences MovingDotNoFrameskip-v0 --synthetic_prefs --ent_coef 0.02 --million_timesteps 0.15
  ```
+
+
+ ### Train Pong
+
+ #### With human preferences
+ Gather the initial 500 preferences for Pong
+ ```bash
+ python run.py gather_initial_prefs PongNoFrameskip-v4 --dropout 0.5 --n_envs 16 --million_timesteps 20 --render_episodes --run_name Pong_init_perf
+>>> Saved training preferences to 'runs/Pong_init_perf_4408c85/train.pkl.gz'
+>>> Saved validation preferences to 'runs/Pong_init_perf_4408c85/val.pkl.gz'
+``` 
+
+
+
+```bash
+python3 run.py pretrain_reward_predictor PongNoFrameskip-v4 --load_prefs_dir runs/Pong_init_perf_4408c85
+```
+
+#### Base line
+For comparison, train with synthetic (oracle) preference.
+```bash
+python3 run.py train_policy_with_preferences PongNoFrameskip-v4 --synthetic_prefs --dropout 0.5 --n_envs 16 --million_timesteps 20
+```
+Saved reward predictor checkpoint to 'runs/1738594711_4408c85/reward_predictor_checkpoints/reward_predictor.ckpt-3200'
+Saved training preferences to 'runs/1738595245_4408c85/train.pkl.gz'
+Saved validation preferences to 'runs/1738595245_4408c85/val.pkl.gz'
+
+```bash
+python3 run.py train_policy_with_original_rewards PongNoFrameskip-v4 --n_envs 16 --million_timesteps 10 --run_name pong_original
+
+>>>Trained policy for 10000000 time steps
+>>>Saved policy checkpoint to 'runs/pong_original_4408c85/policy_checkpoints/policy.ckpt-125000'
+>>>Saved policy checkpoint to 'runs/pong_original_4408c85/policy_checkpoints/policy.ckpt-125000'
+```
+
+
+Next step : try to finetuene the previous policy
+python3 run.py train_policy_with_preferences PongNoFrameskip-v4 --n_envs 16 --million_timesteps 10 --load_policy_ckpt_dir runs/pong_original_4408c85/policy_checkpoints --load_prefs_dir runs/Pong_init_perf_4408c85 --run_name pong_finetune
